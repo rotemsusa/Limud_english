@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Tenses 🕐</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #0f1a2e;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+    color: #fff;
+  }
+  h1 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: #fff; margin-bottom: 4px; }
+  .subtitle { color: #8fa8cc; font-size: 0.9rem; margin-bottom: 20px; direction: rtl; }
+
+  /* Scenario selector */
+  .scenario-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 18px; max-width: 600px;
+  }
+  .sc-btn {
+    padding: 8px 16px; border-radius: 50px;
+    border: 2px solid #2a4a6e;
+    background: #1a2d4a; color: #8fa8cc;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .sc-btn:hover { border-color: #4a90d9; color: #fff; }
+  .sc-btn.active { background: #1a5cad; border-color: #4a90d9; color: #fff; }
+
+  /* Tense switcher */
+  .tense-switcher { display: flex; gap: 10px; margin-bottom: 18px; }
+  .tense-btn {
+    padding: 10px 22px; border-radius: 50px; border: 2px solid transparent;
+    font-family: 'Fredoka One', cursive; font-size: 1rem;
+    cursor: pointer; transition: all 0.2s; color: #fff;
+  }
+  .tense-btn.past    { background: #3a1a4a; border-color: #7a3aaa; }
+  .tense-btn.present { background: #1a3a5c; border-color: #3a7aaa; }
+  .tense-btn.future  { background: #1a3a1a; border-color: #3aaa5a; }
+  .tense-btn.active.past    { background: #7a3aaa; box-shadow: 0 4px 16px rgba(122,58,170,0.5); }
+  .tense-btn.active.present { background: #1a6abf; box-shadow: 0 4px 16px rgba(26,106,191,0.5); }
+  .tense-btn.active.future  { background: #1a8a3a; box-shadow: 0 4px 16px rgba(26,138,58,0.5); }
+  .tense-label { font-size: 0.68rem; display: block; opacity: 0.8; font-family: 'Nunito', sans-serif; font-weight: 700; }
+
+  /* Badge */
+  .badge-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
+  .tense-badge {
+    font-size: 0.85rem; font-weight: 700; direction: rtl;
+    padding: 7px 18px; border-radius: 50px; display: inline-block;
+  }
+  .tense-badge.past    { background: #3a1a4a; color: #cc88ff; border: 1px solid #7a3aaa; }
+  .tense-badge.present { background: #1a2d4a; color: #88ccff; border: 1px solid #3a7aaa; }
+  .tense-badge.future  { background: #1a2d1a; color: #88ffaa; border: 1px solid #3aaa5a; }
+
+  /* Card */
+  .card { width: 100%; max-width: 560px; background: #16243d; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  .card-header { padding: 16px 22px; display: flex; align-items: center; gap: 12px; transition: background 0.4s; }
+  .card-header.past    { background: linear-gradient(135deg, #5a2a7a, #3a1a5a); }
+  .card-header.present { background: linear-gradient(135deg, #1a5cad, #0d3a72); }
+  .card-header.future  { background: linear-gradient(135deg, #1a7a3a, #0d4a22); }
+  .scene-icon { font-size: 2.2rem; }
+  .scene-info { direction: rtl; }
+  .scene-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; }
+  .scene-desc  { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
+
+  /* Progress */
+  .progress-wrap { background: #0f1a2e; padding: 10px 22px; display: flex; align-items: center; gap: 12px; }
+  .progress-bar { flex: 1; height: 6px; background: #2a3f5e; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .progress-fill.past    { background: linear-gradient(90deg, #9a4adf, #cc88ff); }
+  .progress-fill.present { background: linear-gradient(90deg, #4a90d9, #67e8f9); }
+  .progress-fill.future  { background: linear-gradient(90deg, #4adf7a, #88ffaa); }
+  .progress-label { font-size: 0.8rem; color: #5a7a9e; white-space: nowrap; direction: rtl; }
+
+  /* Dialogue */
+  .dialogue-area { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; min-height: 280px; }
+  .line {
+    display: flex; gap: 10px; align-items: flex-start;
+    opacity: 0; transform: translateY(14px);
+    animation: fadeUp 0.35s ease forwards; direction: ltr;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; margin-top: 4px; }
+  .line.person-a .avatar { background: #2a1a4a; }
+  .line.person-b .avatar { background: #1a2a4a; }
+  .line.person-b { flex-direction: row-reverse; }
+  .bubble { max-width: 78%; padding: 11px 15px; border-radius: 18px; font-size: 1rem; line-height: 1.5; direction: ltr; text-align: left; }
+  .line.person-a .bubble { background: #1f2f4a; border-bottom-left-radius: 4px; color: #d4e8ff; }
+  .line.person-b .bubble { background: #1a2a3a; border-bottom-right-radius: 4px; color: #c8dff0; }
+  .speaker-name { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; opacity: 0.55; }
+  .verb { padding: 1px 5px; border-radius: 5px; font-weight: 800; }
+  .past    .verb { background: rgba(180,80,255,0.25); color: #cc88ff; }
+  .present .verb { background: rgba(80,160,255,0.2);  color: #88ccff; }
+  .future  .verb { background: rgba(80,255,140,0.2);  color: #88ffaa; }
+  .translation { font-size: 0.78rem; margin-top: 5px; opacity: 0.5; direction: rtl; text-align: right; font-style: italic; }
+
+  /* Grammar */
+  .grammar-box { margin: 0 20px 14px; padding: 11px 15px; border-radius: 12px; font-size: 0.83rem; direction: rtl; text-align: right; border: 1px solid; display: none; line-height: 1.6; }
+  .grammar-box.visible { display: block; }
+  .grammar-box.past    { background: #2a1a3a; border-color: #7a3aaa; color: #cc99ff; }
+  .grammar-box.present { background: #1a2a3a; border-color: #3a7aaa; color: #99ccff; }
+  .grammar-box.future  { background: #1a2a1a; border-color: #3aaa5a; color: #99ffbb; }
+  .grammar-box strong  { font-weight: 800; font-size: 0.88rem; }
+  .grammar-box .formula { font-family: monospace; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 5px; direction: ltr; display: inline-block; }
+
+  /* Buttons */
+  .btn-area { padding: 0 20px 22px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-next { color: #fff; border: none; padding: 13px 30px; border-radius: 50px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
+  .btn-next.past    { background: linear-gradient(135deg, #7a3aaa, #9a5acf); box-shadow: 0 4px 16px rgba(122,58,170,0.4); }
+  .btn-next.present { background: linear-gradient(135deg, #1a5cad, #1a90d9); box-shadow: 0 4px 16px rgba(26,92,173,0.4); }
+  .btn-next.future  { background: linear-gradient(135deg, #1a7a3a, #1aaa5a); box-shadow: 0 4px 16px rgba(26,122,58,0.4); }
+  .btn-next:hover { transform: translateY(-2px); }
+  .btn-next:disabled { opacity: 0.3; cursor: default; transform: none; }
+  .btn-restart { background: transparent; color: #5a7a9e; border: 2px solid #2a4a6e; padding: 13px 22px; border-radius: 50px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .btn-restart:hover { border-color: #4a90d9; color: #a0c4f0; }
+
+  /* Done */
+  .done-screen { display: none; flex-direction: column; align-items: center; padding: 36px 20px; text-align: center; gap: 10px; }
+  .done-screen.visible { display: flex; }
+  .done-emoji { font-size: 3.5rem; }
+  .done-title { font-family: 'Fredoka One', cursive; font-size: 1.7rem; }
+  .done-title.past    { color: #cc88ff; }
+  .done-title.present { color: #67e8f9; }
+  .done-title.future  { color: #88ffaa; }
+  .done-sub { color: #8fa8cc; font-size: 0.95rem; direction: rtl; }
+  .stars { font-size: 1.8rem; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+
+<h1>🕐 Tense Adventure</h1>
+<p class="subtitle">בחר תסריט וזמן — ולמד אנגלית מדוברת</p>
+
+<!-- Scenario selector -->
+<div class="scenario-bar" id="scenarioBar"></div>
+
+<!-- Tense switcher -->
+<div class="tense-switcher">
+  <button class="tense-btn past"    onclick="setTense('past')">⏮ Past<span class="tense-label">עבר</span></button>
+  <button class="tense-btn present active" onclick="setTense('present')">▶ Present<span class="tense-label">הווה</span></button>
+  <button class="tense-btn future"  onclick="setTense('future')">⏭ Future<span class="tense-label">עתיד</span></button>
+</div>
+
+<div class="badge-wrap">
+  <div class="tense-badge present" id="tenseBadge">הווה פשוט — Simple Present</div>
+</div>
+<br>
+
+<div class="card" id="mainCard">
+  <div class="card-header present" id="cardHeader">
+    <div class="scene-icon" id="sceneIcon">🍔</div>
+    <div class="scene-info">
+      <div class="scene-title" id="sceneTitleEl"></div>
+      <div class="scene-desc"  id="sceneDescEl"></div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill present" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0</div>
+  </div>
+  <div class="dialogue-area" id="dialogueArea"></div>
+  <div class="grammar-box present" id="grammarBox"></div>
+  <div class="btn-area">
+    <button class="btn-next present" id="btnNext" onclick="nextLine()">▶ הבא</button>
+    <button class="btn-restart" onclick="restart()">↺ מחדש</button>
+  </div>
+  <div class="done-screen" id="doneScreen">
+    <div class="done-emoji">🎉</div>
+    <div class="done-title present" id="doneTitle">Great job!</div>
+    <div class="stars">⭐⭐⭐</div>
+    <div class="done-sub" id="doneSub">עכשיו נסה זמן אחר 👆</div>
+    <button class="btn-next present" id="doneBtn" style="margin-top:12px" onclick="restart()">↺ שוב מההתחלה</button>
+  </div>
+</div>
+
+<script>
+const scenarios = [
+
+  // ── 1. RESTAURANT ─────────────────────────────────────────────────────────
+  {
+    id: 'restaurant', label: '🍔 מסעדה', icon: '🍔', title: 'At the Restaurant',
+    tenses: {
+      present: {
+        badge: 'הווה פשוט — Simple Present', desc: 'הזמנת אוכל (עכשיו)',
+        lines: [
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'Good afternoon! <span class="verb">Do</span> you <span class="verb">have</span> a reservation?', tr:'אחר הצהריים טובים! יש לכם הזמנה?', grammar:'<strong>Do you have…?</strong><br>שאלה בהווה: <span class="formula">Do + subject + verb</span><br>Do = פועל עזר לשאלות בהווה' },
+          { who:'b', name:'You', emoji:'🙂', text:'No, we <span class="verb">don\'t</span>. <span class="verb">Is</span> there a table for two?', tr:'לא, אין לנו. יש שולחן לשניים?', grammar:'<strong>don\'t</strong> = do not — שלילה בהווה<br><span class="formula">subject + don\'t + verb</span>' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'Of course! <span class="verb">Come</span> right this way.', tr:'כמובן! בואו אחריי.', grammar:'<strong>Come!</strong> — פקודה (Imperative)<br>בפקודה מתחילים ישירות בפועל, ללא subject' },
+          { who:'b', name:'You', emoji:'🙂', text:'<span class="verb">Can</span> I <span class="verb">see</span> the menu?', tr:'אפשר לראות את התפריט?', grammar:'<strong>Can I see…?</strong> — בקשה מנומסת<br><span class="formula">Can + I + verb</span>' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'Today\'s special <span class="verb">is</span> grilled chicken.', tr:'המנה המיוחדת היום היא עוף בגריל.', grammar:'<strong>is</strong> — הווה של to be<br><span class="formula">I am / You are / He is</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll have</span> that, please.', tr:'אני אקח את זה, בבקשה.', grammar:'<strong>I\'ll have</strong> = I will have<br>will לבחירה ספונטנית — נפוץ מאוד!' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'<span class="verb">Is</span> there anything else?', tr:'עוד משהו?', grammar:'<strong>Is there…?</strong> — שאלת קיום<br>השווה: There is (יש) ← שאלה: Is there?' },
+          { who:'b', name:'You', emoji:'🙂', text:'No, that <span class="verb">\'s</span> everything. Thank you!', tr:'לא, זה הכל. תודה!', grammar:'<strong>that\'s</strong> = that is — קיצור נפוץ בשפה מדוברת' },
+        ]
+      },
+      past: {
+        badge: 'עבר פשוט — Simple Past', desc: 'הזמנת אוכל (אתמול)',
+        lines: [
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'<span class="verb">Did</span> you <span class="verb">have</span> a reservation?', tr:'הייתה לכם הזמנה?', grammar:'<strong>Did you have…?</strong> — שאלה בעבר<br><span class="formula">Did + subject + verb (בסיס)</span><br>הפועל חוזר לבסיס אחרי Did!' },
+          { who:'b', name:'You', emoji:'🙂', text:'No, we <span class="verb">didn\'t</span>. <span class="verb">Was</span> there a table?', tr:'לא. האם היה שולחן?', grammar:'<strong>didn\'t</strong> = did not — שלילה בעבר<br><strong>was</strong> = עבר של is' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'I <span class="verb">showed</span> them to a table.', tr:'הראיתי להם שולחן.', grammar:'<strong>showed</strong> — פועל סדיר<br><span class="formula">verb + ed → show → showed</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">asked</span> to see the menu.', tr:'ביקשתי לראות את התפריט.', grammar:'<strong>asked</strong> — סדיר: ask + ed<br>פעלים סדירים: פשוט מוסיפים ed ✓' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'The special <span class="verb">was</span> grilled chicken.', tr:'המנה המיוחדת הייתה עוף בגריל.', grammar:'<strong>was</strong> — עבר של is/am<br><span class="formula">is/am → was | are → were</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">ordered</span> that.', tr:'הזמנתי את זה.', grammar:'<strong>ordered</strong> — סדיר: order + ed' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'He <span class="verb">asked</span> if there <span class="verb">was</span> anything else.', tr:'הוא שאל אם יש עוד משהו.', grammar:'שני פעלים בעבר באותו משפט<br>בסיפור בעבר, כל הפעלים עוברים לעבר' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">said</span> no and <span class="verb">thanked</span> him.', tr:'אמרתי לא והודיתי לו.', grammar:'<strong>said</strong> — לא סדיר! say → said<br><strong>thanked</strong> — סדיר: thank + ed' },
+        ]
+      },
+      future: {
+        badge: 'עתיד — Future (will)', desc: 'הזמנת אוכל (מחר)',
+        lines: [
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'<span class="verb">Will</span> you <span class="verb">have</span> a reservation?', tr:'האם תהיה לכם הזמנה?', grammar:'<strong>Will you have…?</strong> — שאלה בעתיד<br><span class="formula">Will + subject + verb (בסיס)</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'No, we <span class="verb">won\'t</span>. <span class="verb">Will</span> there <span class="verb">be</span> a table?', tr:'לא. האם יהיה שולחן?', grammar:'<strong>won\'t</strong> = will not — שלילה בעתיד<br><strong>will be</strong> = עתיד של is/are' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'I <span class="verb">\'ll show</span> you the way.', tr:'אני אראה לכם את הדרך.', grammar:'<strong>\'ll</strong> = will — קיצור נפוץ מאוד<br><span class="formula">I\'ll / You\'ll / He\'ll</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'<span class="verb">Will</span> I <span class="verb">be able</span> to see the menu?', tr:'האם אוכל לראות את התפריט?', grammar:'<strong>will be able to</strong> = עתיד של can<br><span class="formula">can → will be able to</span>' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'Tomorrow\'s special <span class="verb">will be</span> grilled chicken.', tr:'המנה מחר תהיה עוף בגריל.', grammar:'<strong>will be</strong> — עתיד של to be<br><span class="formula">am/is/are → will be</span> (לכולם!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll have</span> that, please.', tr:'אני אקח את זה, בבקשה.', grammar:'<strong>I\'ll have</strong> — will לבחירה ספונטנית<br>כשמחליטים ברגע זה — משתמשים ב-will' },
+          { who:'a', name:'Waiter', emoji:'🧑‍🍳', text:'<span class="verb">Will</span> there <span class="verb">be</span> anything else?', tr:'האם יהיה עוד משהו?', grammar:'<strong>Will there be…?</strong> — שאלת קיום בעתיד<br>השווה: Is there? / Was there? / Will there be?' },
+          { who:'b', name:'You', emoji:'🙂', text:'No, that <span class="verb">\'ll be</span> everything. Thank you!', tr:'לא, זה יהיה הכל. תודה!', grammar:'<strong>that\'ll be</strong> = that will be<br>עכשיו אתה מכיר: that\'s / that was / that\'ll be ✓' },
+        ]
+      }
+    }
+  },
+
+  // ── 2. SCHOOL ─────────────────────────────────────────────────────────────
+  {
+    id: 'school', label: '🏫 בית ספר', icon: '🏫', title: 'At School',
+    tenses: {
+      present: {
+        badge: 'הווה פשוט — Simple Present', desc: 'שיחה עם מורה (עכשיו)',
+        lines: [
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'Good morning! <span class="verb">Does</span> everyone <span class="verb">have</span> their homework?', tr:'בוקר טוב! לכולם יש שיעורי בית?', grammar:'<strong>Does everyone have…?</strong><br>עם he/she/it/everyone: <span class="formula">Does + subject + verb</span><br>Does (לא Do) לגוף שלישי יחיד!' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! But I <span class="verb">don\'t understand</span> question five.', tr:'כן! אבל אני לא מבין שאלה חמש.', grammar:'<strong>don\'t understand</strong> — שלילה בהווה<br><span class="formula">I/You/We/They + don\'t + verb</span>' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'What <span class="verb">does</span> the question <span class="verb">say</span>?', tr:'מה כתוב בשאלה?', grammar:'<strong>does the question say?</strong><br>does = שאלה לגוף ג׳ יחיד (the question = it)<br>שים לב: הפועל say נשאר בבסיס!' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">asks</span> about fractions. I <span class="verb">need</span> help.', tr:'היא שואלת על שברים. אני צריך עזרה.', grammar:'<strong>asks / needs</strong> — גוף ג׳ יחיד בהווה<br><span class="formula">verb + s → ask→asks, need→needs</span>' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'No problem. Let\'s <span class="verb">look</span> at it together.', tr:'אין בעיה. בוא נסתכל על זה ביחד.', grammar:'<strong>Let\'s look</strong> = Let us look<br>הצעה לעשות משהו ביחד: <span class="formula">Let\'s + verb</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'Thank you! That <span class="verb">helps</span> a lot.', tr:'תודה! זה עוזר מאוד.', grammar:'<strong>helps</strong> — גוף ג׳ יחיד (that = it)<br>כלל: he/she/it/that → פועל מקבל s' },
+          { who:'a', name:'Friend', emoji:'😄', text:'Hey! <span class="verb">Do</span> you <span class="verb">want</span> to play football after school?', tr:'היי! אתה רוצה לשחק כדורגל אחרי בית הספר?', grammar:'<strong>Do you want…?</strong> — הצעה בהווה<br>want = פועל שמתאר רצון, לא פעולה' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! I <span class="verb">love</span> football. What time <span class="verb">does</span> it <span class="verb">start</span>?', tr:'כן! אני אוהב כדורגל. באיזו שעה זה מתחיל?', grammar:'<strong>does it start?</strong> — שאלה על גוף ג׳ יחיד (it)<br>love / start — פעלי הווה רגילים' },
+        ]
+      },
+      past: {
+        badge: 'עבר פשוט — Simple Past', desc: 'שיחה עם מורה (אתמול)',
+        lines: [
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'Good morning! <span class="verb">Did</span> everyone <span class="verb">bring</span> their homework?', tr:'בוקר טוב! כולם הביאו שיעורי בית?', grammar:'<strong>Did everyone bring…?</strong><br>עבר שאלה: <span class="formula">Did + subject + verb (בסיס)</span><br>bring נשאר בסיס (לא brought) אחרי Did!' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! But I <span class="verb">didn\'t understand</span> question five.', tr:'כן! אבל לא הבנתי שאלה חמש.', grammar:'<strong>didn\'t understand</strong> — שלילה בעבר<br><span class="formula">didn\'t + verb (בסיס)</span>' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'What <span class="verb">did</span> the question <span class="verb">ask</span>?', tr:'מה השאלה שאלה?', grammar:'<strong>did the question ask?</strong><br>שאלה בעבר לגוף כלשהו — תמיד Did<br>(בעבר אין הבדל בין גוף ראשון לשלישי!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">was</span> about fractions. I <span class="verb">needed</span> help.', tr:'היא הייתה על שברים. הצטרכתי עזרה.', grammar:'<strong>was</strong> — עבר של is<br><strong>needed</strong> — סדיר: need + ed' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'We <span class="verb">looked</span> at it together after class.', tr:'הסתכלנו על זה ביחד אחרי הכיתה.', grammar:'<strong>looked</strong> — סדיר: look + ed<br>פשוט מוסיפים ed לפעלים סדירים ✓' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">helped</span> a lot. I <span class="verb">understood</span> it!', tr:'זה עזר מאוד. הבנתי את זה!', grammar:'<strong>helped</strong> — סדיר: help + ed<br><strong>understood</strong> — לא סדיר! understand → understood' },
+          { who:'a', name:'Friend', emoji:'😄', text:'Hey! <span class="verb">Did</span> you <span class="verb">play</span> football yesterday?', tr:'היי! שיחקת כדורגל אתמול?', grammar:'<strong>Did you play?</strong> — שאלת עבר<br>play נשאר בסיס אחרי Did (לא played!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! We <span class="verb">played</span> for two hours. It <span class="verb">was</span> great!', tr:'כן! שיחקנו שעתיים. זה היה נהדר!', grammar:'<strong>played</strong> — סדיר: play + ed<br><strong>was</strong> — עבר של is/am' },
+        ]
+      },
+      future: {
+        badge: 'עתיד — Future (will)', desc: 'שיחה עם מורה (מחר)',
+        lines: [
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'Tomorrow <span class="verb">will</span> everyone <span class="verb">bring</span> their homework?', tr:'האם מחר כולם יביאו שיעורי בית?', grammar:'<strong>Will everyone bring…?</strong><br>עתיד שאלה: <span class="formula">Will + subject + verb (בסיס)</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! But I <span class="verb">won\'t understand</span> question five.', tr:'כן! אבל לא אבין שאלה חמש.', grammar:'<strong>won\'t understand</strong> — שלילה בעתיד<br><span class="formula">won\'t + verb (בסיס)</span>' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'What <span class="verb">will</span> the question <span class="verb">be</span> about?', tr:'על מה השאלה תהיה?', grammar:'<strong>will it be about?</strong><br>בעתיד אין הבדל בין גופים — תמיד will' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">will be</span> about fractions. I <span class="verb">\'ll need</span> help.', tr:'היא תהיה על שברים. אצטרך עזרה.', grammar:'<strong>will be</strong> — עתיד של is<br><strong>\'ll need</strong> = will need — קיצור' },
+          { who:'a', name:'Teacher', emoji:'👩‍🏫', text:'We <span class="verb">\'ll look</span> at it together after class.', tr:'נסתכל על זה ביחד אחרי הכיתה.', grammar:'<strong>we\'ll look</strong> = we will look<br>\'ll = will — קיצור לכל הגופים' },
+          { who:'b', name:'You', emoji:'🙂', text:'That <span class="verb">\'ll help</span> a lot. I <span class="verb">\'ll understand</span> it!', tr:'זה יעזור מאוד. אבין את זה!', grammar:'<strong>\'ll help / \'ll understand</strong><br>ביטחון בעתיד — will מביע הבטחה!' },
+          { who:'a', name:'Friend', emoji:'😄', text:'Hey! <span class="verb">Will</span> you <span class="verb">play</span> football tomorrow?', tr:'היי! אתה תשחק כדורגל מחר?', grammar:'<strong>Will you play?</strong> — שאלת עתיד<br>play נשאר בסיס אחרי will (לא plays!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! We <span class="verb">\'ll play</span> for two hours. It <span class="verb">\'ll be</span> great!', tr:'כן! נשחק שעתיים. זה יהיה נהדר!', grammar:'<strong>\'ll play / \'ll be</strong> — עתיד בטוח<br>השווה: played (עבר) / play (הווה) / \'ll play (עתיד)' },
+        ]
+      }
+    }
+  },
+
+  // ── 3. STORE ──────────────────────────────────────────────────────────────
+  {
+    id: 'store', label: '🛒 חנות', icon: '🛒', title: 'At the Store',
+    tenses: {
+      present: {
+        badge: 'הווה פשוט — Simple Present', desc: 'קנייה בחנות (עכשיו)',
+        lines: [
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Hello! <span class="verb">Can</span> I <span class="verb">help</span> you?', tr:'שלום! אני יכול לעזור?', grammar:'<strong>Can I help you?</strong> — הצעה עזרה<br>Can = פועל מודאלי לאפשרות / בקשה' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! I <span class="verb">\'m looking</span> for a birthday gift.', tr:'כן! אני מחפש מתנת יום הולדת.', grammar:'<strong>I\'m looking</strong> — הווה מתמשך (Present Continuous)<br><span class="formula">am/is/are + verb+ing</span><br>פעולה שקורית ממש עכשיו!' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'How old <span class="verb">is</span> your friend?', tr:'בן כמה החבר שלך?', grammar:'<strong>How old is…?</strong> — שאלת גיל<br>is = הווה של to be' },
+          { who:'b', name:'You', emoji:'🙂', text:'He <span class="verb">is</span> eleven. He <span class="verb">loves</span> football.', tr:'הוא בן אחת עשרה. הוא אוהב כדורגל.', grammar:'<strong>loves</strong> — גוף ג׳ יחיד (he)<br><span class="formula">love → loves</span> (מוסיפים s)' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'This football game <span class="verb">costs</span> thirty shekels.', tr:'משחק הכדורגל הזה עולה שלושים שקל.', grammar:'<strong>costs</strong> — עלות, גוף ג׳ יחיד<br><span class="formula">cost → costs</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll take</span> it! <span class="verb">Do</span> you <span class="verb">accept</span> cards?', tr:'אני אקח את זה! אתם מקבלים כרטיסים?', grammar:'<strong>Do you accept?</strong> — שאלה בהווה<br><strong>I\'ll take</strong> — will לבחירה ספונטנית' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Yes, we <span class="verb">do</span>. Here <span class="verb">is</span> your receipt.', tr:'כן, אנחנו מקבלים. הנה הקבלה שלך.', grammar:'<strong>Yes, we do</strong> — תשובה קצרה<br>בעברית אומרים ״כן״ — באנגלית חוזרים על פועל העזר' },
+          { who:'b', name:'You', emoji:'🙂', text:'Thank you! Have a nice day!', tr:'תודה רבה! יום נעים!', grammar:'<strong>Have a nice day!</strong> — ברכת פרידה<br>Have = פועל בצורת פקודה (Imperative)' },
+        ]
+      },
+      past: {
+        badge: 'עבר פשוט — Simple Past', desc: 'קנייה בחנות (אתמול)',
+        lines: [
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Hello! <span class="verb">Could</span> I <span class="verb">help</span> you?', tr:'שלום! יכולתי לעזור לך?', grammar:'<strong>Could</strong> = עבר של can<br><span class="formula">can → could</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! I <span class="verb">was looking</span> for a birthday gift.', tr:'כן! חיפשתי מתנת יום הולדת.', grammar:'<strong>was looking</strong> — עבר מתמשך (Past Continuous)<br><span class="formula">was/were + verb+ing</span><br>פעולה שהייתה בתהליך בעבר' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'How old <span class="verb">was</span> your friend?', tr:'בן כמה היה החבר שלך?', grammar:'<strong>was</strong> — עבר של is<br><span class="formula">is/am → was | are → were</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'He <span class="verb">was</span> turning eleven. He <span class="verb">loved</span> football.', tr:'הוא עמד להיות בן אחת עשרה. הוא אהב כדורגל.', grammar:'<strong>loved</strong> — סדיר: love + d<br>(כשהפועל מסתיים ב-e, מוסיפים רק d)' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'The football game <span class="verb">cost</span> thirty shekels.', tr:'משחק הכדורגל עלה שלושים שקל.', grammar:'<strong>cost</strong> — לא סדיר! cost → cost<br>חלק מהפעלים לא משתנים בעבר!' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">took</span> it! <span class="verb">Did</span> they <span class="verb">accept</span> cards?', tr:'לקחתי את זה! האם הם קיבלו כרטיסים?', grammar:'<strong>took</strong> — לא סדיר! take → took<br><strong>Did they accept?</strong> — שאלת עבר' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Yes, we <span class="verb">did</span>. Here <span class="verb">was</span> the receipt.', tr:'כן, קיבלנו. הנה הייתה הקבלה.', grammar:'<strong>Yes, we did</strong> — תשובה קצרה בעבר<br>חוזרים על did (לא do)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">thanked</span> him and <span class="verb">left</span>.', tr:'הודיתי לו ויצאתי.', grammar:'<strong>thanked</strong> — סדיר: thank + ed<br><strong>left</strong> — לא סדיר! leave → left' },
+        ]
+      },
+      future: {
+        badge: 'עתיד — Future (will)', desc: 'קנייה בחנות (מחר)',
+        lines: [
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Hello! <span class="verb">Will</span> I <span class="verb">be able</span> to help you?', tr:'שלום! האם אוכל לעזור לך?', grammar:'<strong>Will I be able to?</strong><br>can בעתיד = will be able to<br><span class="formula">can → will be able to + verb</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'Yes! I <span class="verb">\'ll be looking</span> for a birthday gift.', tr:'כן! אחפש מתנת יום הולדת.', grammar:'<strong>\'ll be looking</strong> — עתיד מתמשך (Future Continuous)<br><span class="formula">will be + verb+ing</span><br>פעולה שתהיה בתהליך בעתיד' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'How old <span class="verb">will</span> your friend <span class="verb">be</span>?', tr:'בן כמה החבר שלך יהיה?', grammar:'<strong>will your friend be?</strong><br>to be בעתיד = will be (לכל הגופים)' },
+          { who:'b', name:'You', emoji:'🙂', text:'He <span class="verb">\'ll be</span> turning eleven. He <span class="verb">\'ll love</span> football forever!', tr:'הוא יהיה בן אחת עשרה. הוא יאהב כדורגל לנצח!', grammar:'<strong>\'ll be / \'ll love</strong> = will be / will love<br>\'ll = will — קיצור לכל הגופים' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'This game <span class="verb">will cost</span> thirty shekels.', tr:'המשחק הזה יעלה שלושים שקל.', grammar:'<strong>will cost</strong> — עתיד<br>הפועל cost נשאר בסיס אחרי will (גם בעתיד cost = cost!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll take</span> it! <span class="verb">Will</span> you <span class="verb">accept</span> cards?', tr:'אני אקח את זה! האם תקבלו כרטיסים?', grammar:'<strong>Will you accept?</strong> — שאלת עתיד<br>כל השאלות בעתיד מתחילות ב-Will' },
+          { who:'a', name:'Worker', emoji:'🧑‍💼', text:'Yes, we <span class="verb">will</span>. There <span class="verb">\'ll be</span> a receipt too.', tr:'כן, נקבל. תהיה גם קבלה.', grammar:'<strong>Yes, we will</strong> — תשובה קצרה בעתיד<br>חוזרים על will (לא do / did)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll thank</span> you and <span class="verb">leave</span>!', tr:'אודה לך ואצא!', grammar:'<strong>\'ll thank / leave</strong> = will thank / will leave<br>אחרי and לא חוזרים על will — הוא מובן מאליו' },
+        ]
+      }
+    }
+  },
+
+  // ── 4. PHONE CALL ─────────────────────────────────────────────────────────
+  {
+    id: 'phone', label: '📞 טלפון', icon: '📞', title: 'On the Phone',
+    tenses: {
+      present: {
+        badge: 'הווה פשוט — Simple Present', desc: 'שיחת טלפון עם חבר (עכשיו)',
+        lines: [
+          { who:'a', name:'Mom', emoji:'👩', text:'Hello?', tr:'הלו?', grammar:'<strong>Hello?</strong> — ברכה בטלפון<br>באנגלית עונים לטלפון תמיד עם Hello!' },
+          { who:'b', name:'You', emoji:'🙂', text:'Hi! This <span class="verb">is</span> Daniel. <span class="verb">Is</span> Tom there?', tr:'היי! זה דניאל. האם טום שם?', grammar:'<strong>This is Daniel</strong> — הצגה עצמית בטלפון<br>אומרים: "This is..." ולא "I am..." בטלפון!' },
+          { who:'a', name:'Mom', emoji:'👩', text:'Hi Daniel! Yes, just a moment. He <span class="verb">\'s</span> coming.', tr:'היי דניאל! כן, רגע. הוא בא.', grammar:'<strong>He\'s coming</strong> — הווה מתמשך<br><span class="formula">is + verb+ing</span> = פעולה בתהליך עכשיו' },
+          { who:'a', name:'Tom', emoji:'😊', text:'Hey! What <span class="verb">\'s</span> up?', tr:'היי! מה נשמע?', grammar:'<strong>What\'s up?</strong> = What is up?<br>ביטוי מדובר נפוץ — שאלת "מה שלומך?"' },
+          { who:'b', name:'You', emoji:'🙂', text:'<span class="verb">Do</span> you <span class="verb">want</span> to come over today?', tr:'אתה רוצה לבוא אליי היום?', grammar:'<strong>Do you want to…?</strong> — הצעה<br>want = פועל רצון (לא הווה מתמשך!)' },
+          { who:'a', name:'Tom', emoji:'😊', text:'Yes! What time <span class="verb">does</span> it <span class="verb">start</span>?', tr:'כן! באיזו שעה זה מתחיל?', grammar:'<strong>does it start?</strong> — גוף ג׳ יחיד (it)<br>does + verb בסיס (לא starts אחרי does!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'<span class="verb">Come</span> at three. We <span class="verb">can</span> play video games.', tr:'בוא בשלוש. אנחנו יכולים לשחק משחקי וידאו.', grammar:'<strong>Come!</strong> — פקודה (Imperative)<br><strong>can play</strong> — can + verb בסיס (לא plays!)' },
+          { who:'a', name:'Tom', emoji:'😊', text:'Awesome! See you then. Bye!', tr:'מגניב! נתראה אז. להתראות!', grammar:'<strong>See you!</strong> — ביטוי פרידה<br>= I will see you — מקוצר לחלוטין בשפה מדוברת' },
+        ]
+      },
+      past: {
+        badge: 'עבר פשוט — Simple Past', desc: 'שיחת טלפון עם חבר (אתמול)',
+        lines: [
+          { who:'a', name:'Mom', emoji:'👩', text:'She <span class="verb">answered</span> the phone.', tr:'היא ענתה לטלפון.', grammar:'<strong>answered</strong> — סדיר: answer + ed<br>פעלים סדירים: פשוט מוסיפים ed ✓' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">said</span>: "This <span class="verb">was</span> Daniel. <span class="verb">Was</span> Tom there?"', tr:'אמרתי: "זה היה דניאל. האם טום היה שם?"', grammar:'<strong>said</strong> — לא סדיר! say → said<br><strong>was</strong> — עבר של is' },
+          { who:'a', name:'Mom', emoji:'👩', text:'She <span class="verb">said</span> he <span class="verb">was coming</span>.', tr:'היא אמרה שהוא בא.', grammar:'<strong>was coming</strong> — עבר מתמשך<br><span class="formula">was/were + verb+ing</span>' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">asked</span>: "What <span class="verb">was</span> up?"', tr:'הוא שאל: "מה היה חדש?"', grammar:'<strong>asked</strong> — סדיר: ask + ed<br><strong>was</strong> — עבר של is' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">asked</span> if he <span class="verb">wanted</span> to come over.', tr:'שאלתי אם הוא רוצה לבוא.', grammar:'<strong>wanted</strong> — סדיר: want + ed<br>בסיפור עבר, כל הפעלים עוברים לעבר' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">wanted</span> to know what time it <span class="verb">started</span>.', tr:'הוא רצה לדעת באיזו שעה זה מתחיל.', grammar:'<strong>started</strong> — סדיר: start + ed<br>שים לב: כפל t לפני ed? לא כאן (כי האות לפני t היא r)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">told</span> him to come at three.', tr:'אמרתי לו לבוא בשלוש.', grammar:'<strong>told</strong> — לא סדיר! tell → told<br>חשוב ללמוד פעלים לא סדירים בנפרד!' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">said</span> it <span class="verb">was</span> awesome and <span class="verb">hung</span> up.', tr:'הוא אמר שזה מגניב וסגר את הטלפון.', grammar:'<strong>hung</strong> — לא סדיר! hang up → hung up<br><strong>said</strong> — לא סדיר! say → said' },
+        ]
+      },
+      future: {
+        badge: 'עתיד — Future (will)', desc: 'שיחת טלפון עם חבר (מחר)',
+        lines: [
+          { who:'a', name:'Mom', emoji:'👩', text:'She <span class="verb">\'ll answer</span> the phone.', tr:'היא תענה לטלפון.', grammar:'<strong>\'ll answer</strong> = will answer<br>\'ll = will — קיצור נפוץ בדיבור' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll say</span>: "This <span class="verb">is</span> Daniel. <span class="verb">Will</span> Tom <span class="verb">be</span> there?"', tr:'אגיד: "זה דניאל. האם טום יהיה שם?"', grammar:'<strong>This is Daniel</strong> — גם בעתיד ההצגה בטלפון בהווה!<br><strong>Will Tom be there?</strong> — שאלת עתיד' },
+          { who:'a', name:'Mom', emoji:'👩', text:'She <span class="verb">\'ll say</span> he <span class="verb">\'ll be coming</span>.', tr:'היא תאמר שהוא יבוא.', grammar:'<strong>\'ll be coming</strong> — עתיד מתמשך<br><span class="formula">will be + verb+ing</span>' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">\'ll ask</span>: "What <span class="verb">\'s</span> up?"', tr:'הוא ישאל: "מה נשמע?"', grammar:'<strong>What\'s up?</strong> — ביטוי שנשאר בהווה<br>ביטויים קבועים לא משתנים לעתיד!' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll ask</span> if he <span class="verb">\'ll want</span> to come over.', tr:'אשאל אם הוא ירצה לבוא.', grammar:'<strong>\'ll want</strong> = will want<br>גם פעלי רצון יכולים להיות בעתיד' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">\'ll want</span> to know what time it <span class="verb">will start</span>.', tr:'הוא ירצה לדעת באיזו שעה זה יתחיל.', grammar:'<strong>will start</strong> — עתיד<br>will start = \'ll start (אותו דבר!)' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll tell</span> him to come at three.', tr:'אגיד לו לבוא בשלוש.', grammar:'<strong>\'ll tell</strong> = will tell<br>tell → told (עבר לא סדיר) → will tell (עתיד = בסיס!)' },
+          { who:'a', name:'Tom', emoji:'😊', text:'He <span class="verb">\'ll say</span> it <span class="verb">\'ll be</span> awesome and <span class="verb">\'ll hang</span> up.', tr:'הוא יגיד שזה יהיה מגניב ויסגור.', grammar:'שלושה will באותו משפט!<br>אחרי and לפעמים חוזרים על \'ll לבהירות' },
+        ]
+      }
+    }
+  },
+
+  // ── 5. DOCTOR ─────────────────────────────────────────────────────────────
+  {
+    id: 'doctor', label: '🏥 רופא', icon: '🏥', title: 'At the Doctor',
+    tenses: {
+      present: {
+        badge: 'הווה פשוט — Simple Present', desc: 'ביקור אצל רופא (עכשיו)',
+        lines: [
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'Hello! How <span class="verb">do</span> you <span class="verb">feel</span> today?', tr:'שלום! איך אתה מרגיש היום?', grammar:'<strong>How do you feel?</strong><br>שאלת מצב בהווה: <span class="formula">How + do + subject + verb</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">don\'t feel</span> well. My throat <span class="verb">hurts</span>.', tr:'אני לא מרגיש טוב. הגרון שלי כואב.', grammar:'<strong>don\'t feel</strong> — שלילה בהווה<br><strong>hurts</strong> — גוף ג׳ יחיד (my throat = it)<br>hurt → hurts' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'How long <span class="verb">have</span> you <span class="verb">had</span> this?', tr:'כמה זמן יש לך את זה?', grammar:'<strong>How long have you had?</strong> — Present Perfect<br><span class="formula">have/has + past participle</span><br>מצב שהתחיל בעבר ונמשך עד עכשיו' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ve had</span> it for three days. I also <span class="verb">have</span> a fever.', tr:'יש לי את זה שלושה ימים. גם יש לי חום.', grammar:'<strong>\'ve had</strong> = have had — Present Perfect<br><strong>I have a fever</strong> — הווה פשוט לתיאור מצב' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'Open your mouth. I <span class="verb">need</span> to <span class="verb">check</span> your throat.', tr:'פתח את הפה. אני צריך לבדוק את הגרון.', grammar:'<strong>need to check</strong> — need + to + verb<br>need to = צריך ל / יש צורך ל' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">hurts</span> when I <span class="verb">swallow</span>.', tr:'זה כואב כשאני בולע.', grammar:'<strong>when I swallow</strong> — תנאי בהווה<br>swallow = לבלוע (פועל רגיל בהווה)' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'You <span class="verb">have</span> an infection. I <span class="verb">\'m going to give</span> you medicine.', tr:'יש לך זיהום. אני הולך לתת לך תרופה.', grammar:'<strong>I\'m going to give</strong> — be going to<br><span class="formula">am/is/are + going to + verb</span><br>תכנון שכבר החלטת עליו' },
+          { who:'b', name:'You', emoji:'🙂', text:'Thank you, doctor. When <span class="verb">do</span> I <span class="verb">take</span> it?', tr:'תודה, דוקטור. מתי אני לוקח את זה?', grammar:'<strong>When do I take it?</strong> — שאלת הווה על הוראות<br>לוחות זמנים קבועים = הווה פשוט' },
+        ]
+      },
+      past: {
+        badge: 'עבר פשוט — Simple Past', desc: 'ביקור אצל רופא (אתמול)',
+        lines: [
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'How <span class="verb">did</span> you <span class="verb">feel</span> that day?', tr:'איך הרגשת באותו יום?', grammar:'<strong>How did you feel?</strong><br>שאלת עבר: <span class="formula">How + did + subject + verb (בסיס)</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">didn\'t feel</span> well. My throat <span class="verb">hurt</span>.', tr:'לא הרגשתי טוב. הגרון שלי כאב.', grammar:'<strong>didn\'t feel</strong> — שלילת עבר<br><strong>hurt</strong> — לא סדיר! hurt → hurt (לא משתנה!)<br>חלק מהפעלים זהים בהווה ובעבר' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'How long <span class="verb">had</span> you <span class="verb">had</span> it?', tr:'כמה זמן כבר היה לך את זה?', grammar:'<strong>had you had?</strong> — Past Perfect<br><span class="formula">had + past participle</span><br>מצב שקדם לאירוע אחר בעבר' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'d had</span> it for three days. I also <span class="verb">had</span> a fever.', tr:'הייתה לי את זה שלושה ימים. גם הייתה לי חום.', grammar:'<strong>\'d had</strong> = had had — Past Perfect<br><strong>had a fever</strong> — הווה פשוט של have → had' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'He <span class="verb">asked</span> me to <span class="verb">open</span> my mouth.', tr:'הוא ביקש ממני לפתוח את הפה.', grammar:'<strong>asked me to open</strong><br>פועל + me + to + verb — מבנה נפוץ מאוד<br>ask → asked (סדיר)' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">hurt</span> when I <span class="verb">swallowed</span>.', tr:'זה כאב כשבלעתי.', grammar:'<strong>hurt</strong> — לא סדיר! hurt → hurt<br><strong>swallowed</strong> — סדיר: swallow + ed' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'He <span class="verb">said</span> I <span class="verb">had</span> an infection and <span class="verb">gave</span> me medicine.', tr:'הוא אמר שיש לי זיהום ונתן לי תרופה.', grammar:'<strong>said</strong> — לא סדיר! say → said<br><strong>gave</strong> — לא סדיר! give → gave' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">asked</span> when I <span class="verb">had to take</span> it.', tr:'שאלתי מתי אני צריך לקחת את זה.', grammar:'<strong>had to take</strong> — עבר של have to<br><span class="formula">have to → had to</span><br>had to = was required to' },
+        ]
+      },
+      future: {
+        badge: 'עתיד — Future (will)', desc: 'ביקור אצל רופא (מחר)',
+        lines: [
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'How <span class="verb">will</span> you <span class="verb">feel</span> tomorrow?', tr:'איך תרגיש מחר?', grammar:'<strong>How will you feel?</strong><br>שאלת עתיד: <span class="formula">How + will + subject + verb (בסיס)</span>' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">won\'t feel</span> well. My throat <span class="verb">will hurt</span>.', tr:'לא ארגיש טוב. הגרון שלי יכאב.', grammar:'<strong>won\'t feel</strong> — שלילת עתיד<br><strong>will hurt</strong> — עתיד (hurt נשאר בסיס!)' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'How long <span class="verb">will</span> you <span class="verb">have</span> had it by then?', tr:'כמה זמן יהיה לך את זה עד אז?', grammar:'<strong>will you have had</strong> — Future Perfect<br><span class="formula">will have + past participle</span><br>פעולה שתסתיים לפני נקודה בעתיד' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll have had</span> it for three days. I <span class="verb">\'ll also have</span> a fever.', tr:'יהיה לי את זה שלושה ימים. גם יהיה לי חום.', grammar:'<strong>\'ll have had</strong> — Future Perfect<br><strong>\'ll have</strong> = will have — עתיד פשוט' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'I <span class="verb">\'ll ask</span> you to <span class="verb">open</span> your mouth.', tr:'אבקש ממך לפתוח את הפה.', grammar:'<strong>\'ll ask you to open</strong><br>will + ask + you + to + verb<br>מבנה: will + פועל + אובייקט + to + פועל' },
+          { who:'b', name:'You', emoji:'🙂', text:'It <span class="verb">will hurt</span> when I <span class="verb">swallow</span>.', tr:'זה יכאב כשאבלע.', grammar:'<strong>when I swallow</strong> — תנאי עתיד<br>אחרי when בעתיד משתמשים בהווה! (לא "will swallow")' },
+          { who:'a', name:'Doctor', emoji:'👨‍⚕️', text:'I <span class="verb">\'ll tell</span> you that you <span class="verb">\'ll have</span> an infection and <span class="verb">\'ll give</span> you medicine.', tr:'אגיד לך שיהיה לך זיהום ואתן לך תרופה.', grammar:'<strong>\'ll tell / \'ll have / \'ll give</strong><br>שרשרת will — כל הפעלים בעתיד' },
+          { who:'b', name:'You', emoji:'🙂', text:'I <span class="verb">\'ll ask</span> when I <span class="verb">\'ll have to take</span> it.', tr:'אשאל מתי אצטרך לקחת את זה.', grammar:'<strong>\'ll have to take</strong> — עתיד של have to<br><span class="formula">will have to + verb</span><br>השווה: have to (הווה) / had to (עבר) / will have to (עתיד)' },
+        ]
+      }
+    }
+  }
+
+]; // end scenarios
+
+// ─── STATE ────────────────────────────────────────────────────────────────
+let currentScenario = 0;
+let currentTense = 'present';
+let currentLine = 0;
+
+// ─── BUILD SCENARIO BAR ──────────────────────────────────────────────────
+function buildScenarioBar() {
+  const bar = document.getElementById('scenarioBar');
+  bar.innerHTML = '';
+  scenarios.forEach((s, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'sc-btn' + (i === currentScenario ? ' active' : '');
+    btn.textContent = s.label;
+    btn.onclick = () => { currentScenario = i; loadAll(); };
+    bar.appendChild(btn);
+  });
+}
+
+// ─── LOAD EVERYTHING ────────────────────────────────────────────────────
+function loadAll() {
+  buildScenarioBar();
+  const sc = scenarios[currentScenario];
+  const t  = currentTense;
+  const td = sc.tenses[t];
+  currentLine = 0;
+
+  // tense buttons
+  document.querySelectorAll('.tense-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tense-btn.' + t).classList.add('active');
+
+  // badge
+  const badge = document.getElementById('tenseBadge');
+  badge.className = 'tense-badge ' + t;
+  badge.textContent = td.badge;
+
+  // header
+  document.getElementById('cardHeader').className = 'card-header ' + t;
+  document.getElementById('sceneIcon').textContent = sc.icon;
+  document.getElementById('sceneTitleEl').textContent = sc.title;
+  document.getElementById('sceneDescEl').textContent = td.desc;
+
+  // progress
+  document.getElementById('progressFill').className = 'progress-fill ' + t;
+
+  // buttons
+  const btn = document.getElementById('btnNext');
+  btn.className = 'btn-next ' + t;
+  btn.disabled = false;
+
+  document.getElementById('doneTitle').className = 'done-title ' + t;
+  document.getElementById('doneBtn').className = 'btn-next ' + t;
+
+  // grammar
+  const gb = document.getElementById('grammarBox');
+  gb.className = 'grammar-box ' + t;
+  gb.classList.remove('visible');
+  gb.innerHTML = '';
+
+  // dialogue
+  document.getElementById('dialogueArea').innerHTML = '';
+  const ds = document.getElementById('doneScreen');
+  ds.classList.remove('visible');
+  ds.style.display = '';
+
+  updateProgress();
+}
+
+function setTense(t) {
+  currentTense = t;
+  loadAll();
+}
+
+function nextLine() {
+  const sc = scenarios[currentScenario];
+  const lines = sc.tenses[currentTense].lines;
+  if (currentLine >= lines.length) return;
+
+  const ld = lines[currentLine];
+  const t  = currentTense;
+  const area = document.getElementById('dialogueArea');
+
+  const div = document.createElement('div');
+  div.className = 'line person-' + ld.who + ' ' + t;
+  div.innerHTML = `
+    <div class="avatar">${ld.emoji}</div>
+    <div class="bubble">
+      <div class="speaker-name">${ld.name}</div>
+      <div class="english-text">${ld.text}</div>
+      <div class="translation">${ld.tr}</div>
+    </div>`;
+  area.appendChild(div);
+
+  const gb = document.getElementById('grammarBox');
+  gb.innerHTML = ld.grammar;
+  gb.classList.add('visible');
+
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  currentLine++;
+  updateProgress();
+
+  if (currentLine >= lines.length) {
+    document.getElementById('btnNext').disabled = true;
+    setTimeout(() => {
+      const ds = document.getElementById('doneScreen');
+      ds.style.display = 'flex';
+      ds.classList.add('visible');
+      const subs = { past: 'עכשיו נסה Present או Future 👆', present: 'עכשיו נסה Past או Future 👆', future: 'עכשיו נסה Past או Present 👆' };
+      document.getElementById('doneSub').textContent = subs[currentTense];
+      ds.scrollIntoView({ behavior: 'smooth' });
+    }, 500);
+  }
+}
+
+function restart() { loadAll(); }
+
+function updateProgress() {
+  const lines = scenarios[currentScenario].tenses[currentTense].lines;
+  document.getElementById('progressFill').style.width = (currentLine / lines.length * 100) + '%';
+  document.getElementById('progressLabel').textContent = currentLine + ' / ' + lines.length;
+}
+
+// Init
+buildScenarioBar();
+loadAll();
+</script>
+</body>
+</html>
